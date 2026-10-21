@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault & Perpustakaan Media Terenkripsi</title>
+    <!-- FontAwesome untuk Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            color-scheme: dark;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        /* --- HALAMAN LOGIN --- */
+        #loginScreen {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            background: radial-gradient(circle at top, #1b2436, #0f1115);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: #161a22;
+            border: 1px solid #262c38;
+            border-radius: 16px;
+            padding: 28px;
+            display: grid;
+            gap: 14px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .login-card h2 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-card p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .login-card input, .login-card button {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid #333b4a;
+            background: #1d222c;
+            color: inherit;
+            padding: 12px 14px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .login-card input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .login-card button {
+            background: var(--accent-color);
+            color: #0f172a;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+        }
+
+        .login-card button:hover {
+            opacity: 0.9;
+        }
+
+        .login-card button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .error {
+            color: #ff8080;
+            font-size: 13px;
+            min-height: 18px;
+        }
+
+        /* --- DASHBOARD UTAMA --- */
+        #app {
+            display: none;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #173226;
+            color: #7ee2a8;
+            border: 1px solid #245c40;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: normal;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: #fff;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .controls button {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .controls button:hover {
+            background: #283548;
+        }
+
+        .btn-danger {
+            background: #ef4444 !important;
+            border-color: #dc2626 !important;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626 !important;
+        }
+
+        /* KATEGORI NAVIGASI */
+        .categories {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 1.5rem 1rem 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            background: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-btn:hover, .category-btn.active {
+            background: var(--accent-color);
+            color: #0f172a;
+            font-weight: bold;
+            border-color: var(--accent-color);
+        }
+
+        /* DROPZONE & STATUS */
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px 1rem 3rem;
+        }
+
+        .dropzone {
+            border: 2px dashed #3b4457;
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .dropzone.drag {
+            border-color: var(--accent-color);
+            color: #cfe0ff;
+            background: #182032;
+        }
+
+        .status {
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            font-size: 13px;
+        }
+
+        /* GALLERY GRID */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card-media {
+            width: 100%;
+            height: 190px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-media img, .card-media video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .audio-container {
+            padding: 20px;
+            width: 100%;
+            text-align: center;
+            background: #1e1b4b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .audio-container audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .text-content {
+            padding: 15px;
+            height: 100%;
+            width: 100%;
+            overflow-y: auto;
+            background: #111827;
+            font-size: 0.85rem;
+            color: #d1d5db;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .card-body {
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .actions button {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: #0f172a;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .actions button:hover {
+            background: #1b2436;
+        }
+
+        .empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-muted);
+            padding: 60px 20px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HALAMAN LOGIN / REGISTER -->
+<div id="loginScreen">
+  <form class="login-card" id="loginForm">
+    <h2><i class="fa-solid fa-vault"></i> Vault Terenkripsi <span class="badge">AES-256</span></h2>
+    <p id="loginHint">Buat password kuat untuk mengamankan dan mengenkripsi media Anda.</p>
+    <input id="password" type="password" placeholder="Password (minimal 8 karakter)" autocomplete="current-password" required>
+    <input id="confirmPassword" type="password" placeholder="Ulangi password" hidden>
+    <div class="error" id="loginError"></div>
+    <button type="submit" id="loginButton">Masuk</button>
+  </form>
+</div>
+
+<!-- KONTEN UTAMA DASHBOARD -->
+<div id="app">
+  <header>
+    <div class="logo">
+      <i class="fa-solid fa-shield-halved"></i> Vault Pribadi <span class="badge">AES-256-GCM</span>
+    </div>
+    
+    <div class="search-container">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input id="search" type="search" placeholder="Cari media atau catatan...">
+    </div>
+
+    <div class="controls">
+      <button id="addBtn"><i class="fa-solid fa-plus"></i> Media</button>
+      <button id="addTextBtn"><i class="fa-solid fa-note-sticky"></i> Catatan Teks</button>
+      <button id="logoutBtn" class="btn-danger"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+      <input id="fileInput" type="file" accept="image/*,video/*,audio/*" multiple hidden>
+    </div>
+  </header>
+
+  <div class="categories">
+    <button class="category-btn active" data-cat="all"><i class="fa-solid fa-border-all"></i> Semua</button>
+    <button class="category-btn" data-cat="foto"><i class="fa-solid fa-image"></i> Foto</button>
+    <button class="category-btn" data-cat="video"><i class="fa-solid fa-video"></i> Video</button>
+    <button class="category-btn" data-cat="audio"><i class="fa-solid fa-music"></i> Audio</button>
+    <button class="category-btn" data-cat="teks"><i class="fa-solid fa-file-lines"></i> Teks</button>
+  </div>
+
+  <main>
+    <div id="dropzone" class="dropzone">
+      Tarik & lepas file (Foto, Video, Audio) ke sini, atau klik tombol <strong>＋ Media</strong>.<br>
+      Setiap berkas dienkripsi secara lokal sebelum disimpan ke browser Anda.
+    </div>
+
+    <p class="status" id="status"></p>
+    <div id="gallery" class="gallery"></div>
+    <div id="empty" class="empty" hidden>Tidak ada media terenkripsi yang ditemukan.</div>
+  </main>
+</div>
+
+<script>
+// --- KONFIGURASI KRIPTOGRAFI & SISTEM ---
+const DB_NAME = 'encrypted-vault-master';
+const STORE = 'vault_items';
+const AUTH_KEY = 'vault_auth_record';
+const SESSION_KEY = 'vault_session_state';
+const PBKDF2_ITERATIONS = 250000;
+
+let db = null;
+let authRecord = null;
+let encryptionKey = null;
+let currentCategory = 'all';
+
+// Tool Helper Konversi Buffer
+const toBase64 = buffer => btoa(String.fromCharCode(...new Uint8Array(buffer)));
+const fromBase64 = text => Uint8Array.from(atob(text), char => char.charCodeAt(0));
+
+function formatBytes(bytes) {
+  if (!bytes) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return (bytes / 1024 ** i).toFixed(i ? 1 : 0) + ' ' + units[i];
+}
+
+// --- ENGINE KRIPTOGRAFI (AES-256-GCM + PBKDF2) ---
+async function deriveKey(password, salt, iterations) {
+  const encoder = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey(
+    'raw', encoder.encode(password), 'PBKDF2', false, ['deriveKey', 'deriveBits']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function makeAuthRecord(password) {
+  const authSalt = crypto.getRandomValues(new Uint8Array(16));
+  const encoder = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey(
+    'raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']
+  );
+  const verifierBits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: authSalt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    baseKey, 256
+  );
+  return {
+    version: 1,
+    authSalt: toBase64(authSalt),
+    iterations: PBKDF2_ITERATIONS,
+    verifier: toBase64(verifierBits)
+  };
+}
+
+async function unlockKey(password) {
+  const authSalt = fromBase64(authRecord.authSalt);
+  const encoder = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey(
+    'raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits', 'deriveKey']
+  );
+  const verifierBits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: authSalt, iterations: authRecord.iterations, hash: 'SHA-256' },
+    baseKey, 256
+  );
+
+  if (toBase64(verifierBits) !== authRecord.verifier) {
+    throw new Error('Password salah. Silakan coba lagi.');
+  }
+
+  const encryptionSalt = fromBase64(authRecord.encryptionSalt);
+  encryptionKey = await deriveKey(password, encryptionSalt, authRecord.iterations);
+}
+
+async function encryptData(dataBuffer) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    encryptionKey,
+    dataBuffer
+  );
+  return { encryptedBlob: new Blob([ciphertext]), iv: toBase64(iv) };
+}
+
+async function decryptData(record) {
+  const iv = fromBase64(record.iv);
+  const ciphertext = await record.encryptedBlob.arrayBuffer();
+  const plaintext = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    encryptionKey,
+    ciphertext
+  );
+  return new Blob([plaintext], { type: record.type || 'application/octet-stream' });
+}
+
+// --- MANAJEMEN INDEXEDDB ---
+function saveAuthRecord(record) { localStorage.setItem(AUTH_KEY, JSON.stringify(record)); }
+function loadAuthRecord() { const r = localStorage.getItem(AUTH_KEY); return r ? JSON.parse(r) : null; }
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      const dbInstance = request.result;
+      if (!dbInstance.objectStoreNames.contains(STORE)) {
+        const store = dbInstance.createObjectStore(STORE, { keyPath: 'id' });
+        store.createIndex('name', 'name');
+        store.createIndex('category', 'category');
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function tx(mode) { return db.transaction(STORE, mode).objectStore(STORE); }
+
+// --- AUTHENTICATION & LOGIN UI ---
+const loginScreen = document.getElementById('loginScreen');
+const app = document.getElementById('app');
+const loginForm = document.getElementById('loginForm');
+const passwordInput = document.getElementById('password');
+const confirmPasswordInput = document.getElementById('confirmPassword');
+const loginHint = document.getElementById('loginHint');
+const loginError = document.getElementById('loginError');
+const loginButton = document.getElementById('loginButton');
+
+authRecord = loadAuthRecord();
+
+if (authRecord) {
+  loginHint.textContent = 'Masukkan password untuk membuka dan mendekripsi vault.';
+  confirmPasswordInput.hidden = true;
+  confirmPasswordInput.required = false;
+} else {
+  confirmPasswordInput.hidden = false;
+  confirmPasswordInput.required = true;
+}
+
+loginForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  loginError.textContent = '';
+  const password = passwordInput.value;
+
+  try {
+    if (!authRecord) {
+      if (password.length < 8) {
+        loginError.textContent = 'Password harus minimal 8 karakter.';
+        return;
+      }
+      if (password !== confirmPasswordInput.value) {
+        loginError.textContent = 'Konfirmasi password tidak cocok.';
+        return;
+      }
+
+      loginButton.disabled = true;
+      loginButton.textContent = 'Membuat kunci enkripsi...';
+
+      authRecord = await makeAuthRecord(password);
+      authRecord.encryptionSalt = toBase64(crypto.getRandomValues(new Uint8Array(16)));
+      saveAuthRecord(authRecord);
+
+      await unlockKey(password);
+      sessionStorage.setItem(SESSION_KEY, 'true');
+      showApp();
+      return;
+    }
+
+    loginButton.disabled = true;
+    loginButton.textContent = 'Membuka vault...';
+    await unlockKey(password);
+
+    sessionStorage.setItem(SESSION_KEY, 'true');
+    showApp();
+  } catch (err) {
+    loginError.textContent = err.message || 'Gagal masuk.';
+  } finally {
+    loginButton.disabled = false;
+    loginButton.textContent = 'Masuk';
+  }
+});
+
+document.getElementById('logoutBtn').onclick = () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+};
+
+async function showApp() {
+  loginScreen.style.display = 'none';
+  app.style.display = 'block';
+  db = await openDB();
+  loadAllItems();
+}
+
+// --- PENGELOLAAN MEDIA & OLEH DATA ---
+async function addFiles(files) {
+  const fileList = [...files];
+  if (!fileList.length) return;
+
+  const status = document.getElementById('status');
+  status.textContent = `Mengenkripsi ${fileList.length} file...`;
+
+  for (const file of fileList) {
+    let cat = 'foto';
+    if (file.type.startsWith('video/')) cat = 'video';
+    else if (file.type.startsWith('audio/')) cat = 'audio';
+    else if (file.type.startsWith('image/')) cat = 'foto';
+
+    const arrayBuffer = await file.arrayBuffer();
+    const { encryptedBlob, iv } = await encryptData(arrayBuffer);
+
+    await new Promise((resolve, reject) => {
+      const request = tx('readwrite').add({
+        id: crypto.randomUUID(),
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        category: cat,
+        addedAt: Date.now(),
+        iv,
+        encryptedBlob
+      });
+      request.onsuccess = resolve;
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  status.textContent = 'Proses enkripsi selesai.';
+  loadAllItems();
+}
+
+async function addTextNote() {
+  const text = prompt('Masukkan catatan rahasia yang ingin Anda simpan:');
+  if (!text) return;
+
+  const title = prompt('Judul catatan:', 'Catatan - ' + new Date().toLocaleDateString('id-ID')) || 'Catatan Tanpa Judul';
+  const encoder = new TextEncoder();
+  const dataBuffer = encoder.encode(text);
+
+  const { encryptedBlob, iv } = await encryptData(dataBuffer);
+
+  await new Promise((resolve, reject) => {
+    const request = tx('readwrite').add({
+      id: crypto.randomUUID(),
+      name: title,
+      size: dataBuffer.byteLength,
+      type: 'text/plain',
+      category: 'teks',
+      addedAt: Date.now(),
+      iv,
+      encryptedBlob
+    });
+    request.onsuccess = resolve;
+  });
+
+  loadAllItems();
+}
+
+async function deleteItem(id) {
+  if (!confirm('Hapus item ini dari vault secara permanen?')) return;
+  await new Promise(resolve => {
+    const request = tx('readwrite').delete(id);
+    request.onsuccess = resolve;
+  });
+  loadAllItems();
+}
+
+function loadAllItems() {
+  const request = tx('readonly').getAll();
+  request.onsuccess = () => renderGallery(request.result);
+}
+
+async function renderGallery(items) {
+  const grid = document.getElementById('gallery');
+  const empty = document.getElementById('empty');
+  const status = document.getElementById('status');
+  const searchQuery = document.getElementById('search').value.trim().toLowerCase();
+
+  grid.innerHTML = '';
+
+  const filtered = items
+    .filter(item => {
+      const matchCat = (currentCategory === 'all' || item.category === currentCategory);
+      const matchSearch = (!searchQuery || item.name.toLowerCase().includes(searchQuery));
+      return matchCat && matchSearch;
+    })
+    .sort((a, b) => b.addedAt - a.addedAt);
+
+  empty.hidden = filtered.length > 0;
+  status.textContent = `${filtered.length} item tersimpan dalam vault.`;
+
+  for (const item of filtered) {
+    const card = document.createElement('article');
+    card.className = 'card';
+
+    const mediaDiv = document.createElement('div');
+    mediaDiv.className = 'card-media';
+
+    try {
+      const decryptedBlob = await decryptData(item);
+      const url = URL.createObjectURL(decryptedBlob);
+
+      if (item.category === 'foto') {
+        mediaDiv.innerHTML = `<img src="${url}" alt="${item.name}" loading="lazy">`;
+      } else if (item.category === 'video') {
+        mediaDiv.innerHTML = `<video src="${url}" controls preload="metadata"></video>`;
+      } else if (item.category === 'audio') {
+        mediaDiv.innerHTML = `
+          <div class="audio-container">
+            <i class="fa-solid fa-music fa-2x" style="color:var(--accent-color)"></i>
+            <audio src="${url}" controls></audio>
+          </div>`;
+      } else if (item.category === 'teks') {
+        const textData = await decryptedBlob.text();
+        mediaDiv.innerHTML = `<div class="text-content">${escapeHTML(textData)}</div>`;
+      }
+
+      const body = document.createElement('div');
+      body.className = 'card-body';
+
+      const title = document.createElement('div');
+      title.className = 'card-title';
+      title.textContent = item.name;
+
+      const meta = document.createElement('div');
+      meta.className = 'card-desc';
+      meta.textContent = `${formatBytes(item.size)} • ${new Date(item.addedAt).toLocaleString('id-ID')}`;
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+
+      const downloadBtn = document.createElement('button');
+      downloadBtn.innerHTML = `<i class="fa-solid fa-download"></i> Unduh`;
+      downloadBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = item.name + (item.category === 'teks' ? '.txt' : '');
+        a.click();
+      };
+
+      const removeBtn = document.createElement('button');
+      removeBtn.innerHTML = `<i class="fa-solid fa-trash"></i> Hapus`;
+      removeBtn.onclick = () => {
+        URL.revokeObjectURL(url);
+        deleteItem(item.id);
+      };
+
+      actions.append(downloadBtn, removeBtn);
+      body.append(title, meta, actions);
+      card.append(mediaDiv, body);
+      grid.append(card);
+
+    } catch (e) {
+      mediaDiv.innerHTML = `<div style="padding:20px;color:#ff8080;text-align:center">Gagal mendekripsi item</div>`;
+      card.append(mediaDiv);
+      grid.append(card);
+    }
+  }
+}
+
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
+}
+
+// --- EVENT HANDLERS ---
+document.getElementById('addBtn').onclick = () => document.getElementById('fileInput').click();
+document.getElementById('addTextBtn').onclick = addTextNote;
+
+document.getElementById('fileInput').onchange = e => {
+  addFiles(e.target.files);
+  e.target.value = '';
+};
+
+document.getElementById('search').oninput = loadAllItems;
+
+document.querySelectorAll('.category-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCategory = btn.dataset.cat;
+    loadAllItems();
+  };
+});
+
+// Drag and Drop
+const dropzone = document.getElementById('dropzone');
+dropzone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropzone.classList.add('drag');
+});
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  addFiles(e.dataTransfer.files);
+});
+
+// Auto login check session
+if (sessionStorage.getItem(SESSION_KEY) === 'true' && authRecord) {
+  // Meminta password ulang jika session aktif tetapi key memori kosong (page refresh)
+  loginScreen.style.display = 'grid';
+  app.style.display = 'none';
+}
+</script>
+</body>
+</html>
